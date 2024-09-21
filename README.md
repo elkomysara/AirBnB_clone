@@ -1,7 +1,3 @@
-Got it! Here's the updated `README.md` file with your preferences:
-
-```markdown
-%%file /home/elkomy/AlxSE/AirBnB_clone/README.md
 
 # AirBnB Clone - The Console
 
