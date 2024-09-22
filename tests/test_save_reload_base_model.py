@@ -2,13 +2,13 @@
 import sys
 import os
 
-# Set the working directory to the project root
+# Add the project root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from models import storage
 from models.base_model import BaseModel
 
-# Print all objects currently in storage
+# Reload and print all objects in storage
 all_objs = storage.all()
 print("-- Reloaded objects --")
 for obj_id in all_objs.keys():
@@ -22,10 +22,3 @@ my_model.name = "My_First_Model"
 my_model.my_number = 89
 my_model.save()
 print(my_model)
-
-# Reload from the JSON file to verify the object was saved
-print("-- Reloaded objects after saving --")
-all_objs = storage.all()
-for obj_id in all_objs.keys():
-    obj = all_objs[obj_id]
-    print(obj)
