@@ -1,10 +1,12 @@
 #!/usr/bin/python3
-"""Module that defines the FileStorage class."""
+"""Defines the FileStorage class for JSON serialization and deserialization."""
+
 import json
 from models.base_model import BaseModel
+from models.user import User  # Import the User class
 
 class FileStorage:
-    """Class for serializing instances to a JSON file and deserializing from JSON file."""
+    """Handles storage of objects in JSON format."""
     
     __file_path = "file.json"
     __objects = {}
@@ -25,12 +27,15 @@ class FileStorage:
             json.dump(obj_dict, f)
 
     def reload(self):
-        """Deserializes the JSON file to __objects, only if the JSON file exists."""
+        """Deserializes the JSON file to __objects (if the JSON file exists)."""
         try:
             with open(self.__file_path, "r") as f:
                 obj_dict = json.load(f)
-                for key, obj in obj_dict.items():
-                    # Assuming only BaseModel for now, you can add more types later.
-                    self.__objects[key] = BaseModel(**obj)
+                for key, value in obj_dict.items():
+                    class_name = value["__class__"]
+                    if class_name == "BaseModel":
+                        self.__objects[key] = BaseModel(**value)
+                    elif class_name == "User":
+                        self.__objects[key] = User(**value)
         except FileNotFoundError:
             pass
