@@ -2,6 +2,7 @@
 """Entry point of the command interpreter."""
 
 import cmd
+import json
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
@@ -10,8 +11,6 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-import re
-import json
 
 
 class HBNBCommand(cmd.Cmd):
@@ -30,37 +29,30 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def default(self, line):
-        """Handle dot notation for 'all()', 'count()', 'show()', 'destroy()', and 'update()'."""
-        match = re.match(r"(\w+)\.(\w+)\((.*)\)", line)
-        if match:
-            class_name, command, args = match.groups()
-            args = args.split(", ", 1)
-            if len(args) > 1:
-                args[1] = args[1].strip()  # Strip any extra spaces
+        """Handles commands in <class name>.command() format."""
+        args = line.split('.')
+        if len(args) == 2:
+            class_name = args[0]
+            command = args[1].split('(')[0]
             if class_name in self.classes:
                 if command == "all":
                     self.do_all(class_name)
                 elif command == "count":
                     self.do_count(class_name)
                 elif command == "show":
-                    if len(args) > 0:
-                        self.do_show(f"{class_name} {args[0].strip('\"')}")
+                    instance_id = args[1].split('(')[1].strip('")')
+                    self.do_show(f"{class_name} {instance_id}")
                 elif command == "destroy":
-                    if len(args) > 0:
-                        self.do_destroy(f"{class_name} {args[0].strip('\"')}")
+                    instance_id = args[1].split('(')[1].strip('")')
+                    self.do_destroy(f"{class_name} {instance_id}")
                 elif command == "update":
-                    if len(args) > 0:
-                        if args[1].startswith("{") and args[1].endswith("}"):
-                            # Treat as dictionary update
-                            try:
-                                dictionary = json.loads(args[1])
-                                self.do_update(f"{class_name} {args[0].strip('\"')} {json.dumps(dictionary)}")
-                            except json.JSONDecodeError:
-                                print("** invalid dictionary format **")
-                        else:
-                            # Treat as individual attribute update
-                            other_args = args[1].split(", ")
-                            self.do_update(f"{class_name} {args[0].strip('\"')} {other_args[0]} {other_args[1]}")
+                    update_args = args[1].split('(')[1].strip(')')
+                    if '{' in update_args:
+                        instance_id, dict_rep = update_args.split(', ', 1)
+                        self.do_update(f"{class_name} {instance_id.strip('\"')} {dict_rep}")
+                    else:
+                        instance_id, attr_name, attr_value = update_args.split(', ')
+                        self.do_update(f"{class_name} {instance_id.strip('\"')} {attr_name.strip('\"')} {attr_value.strip('\"')}")
             else:
                 print("** class doesn't exist **")
         else:
@@ -127,8 +119,8 @@ class HBNBCommand(cmd.Cmd):
         print(count)
 
     def do_update(self, arg):
-        """Updates an instance based on class name, id, attribute name, and attribute value."""
-        args = arg.split(" ", 2)  # Split by spaces, keeping the rest as one part
+        """Updates an instance based on class name, id, attribute name, and value or dictionary."""
+        args = arg.split(" ", 2)
 
         if len(args) < 2:
             print("** class name missing **")
@@ -144,20 +136,17 @@ class HBNBCommand(cmd.Cmd):
                 obj = storage.all()[key]
 
                 # Handle dictionary update
-                if args[2].startswith("{") and args[2].endswith("}"):
+                if args[2].startswith('{') and args[2].endswith('}'):
                     try:
                         attr_dict = json.loads(args[2])
                         for attr_name, attr_value in attr_dict.items():
-                            if isinstance(attr_value, str):
-                                setattr(obj, attr_name, attr_value)
-                            elif isinstance(attr_value, (int, float)):
-                                setattr(obj, attr_name, attr_value)
+                            setattr(obj, attr_name, attr_value)
                         obj.save()
                     except json.JSONDecodeError:
                         print("** invalid dictionary format **")
                 else:
                     # Handle regular attribute update
-                    attr_args = args[2].split()
+                    attr_args = args[2].split(" ", 1)
                     if len(attr_args) < 2:
                         print("** attribute name or value missing **")
                     else:
