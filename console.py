@@ -94,13 +94,17 @@ class HBNBCommand(cmd.Cmd):
         if len(args) == 3:
             if args[2].startswith("{") and args[2].endswith("}"):
                 # Handle dictionary updates
-                attr_dict = eval(args[2])
-                for attr_name, attr_value in attr_dict.items():
-                    if hasattr(obj, attr_name):
-                        attr_type = type(getattr(obj, attr_name))
-                        setattr(obj, attr_name, attr_type(attr_value))
-                    else:
-                        setattr(obj, attr_name, attr_value)
+                try:
+                    attr_dict = eval(args[2])
+                    for attr_name, attr_value in attr_dict.items():
+                        if hasattr(obj, attr_name):
+                            attr_type = type(getattr(obj, attr_name))
+                            setattr(obj, attr_name, attr_type(attr_value))
+                        else:
+                            setattr(obj, attr_name, attr_value)
+                    obj.save()
+                except Exception as e:
+                    print(f"Error: {e}")
             else:
                 # Handle single attribute updates
                 attr_name, attr_value = args[2].split(" ", 1)
