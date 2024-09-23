@@ -95,10 +95,18 @@ class HBNBCommand(cmd.Cmd):
             if args[2].startswith("{") and args[2].endswith("}"):
                 attr_dict = eval(args[2])
                 for attr_name, attr_value in attr_dict.items():
-                    setattr(obj, attr_name, attr_value)
+                    if hasattr(obj, attr_name):
+                        attr_type = type(getattr(obj, attr_name))
+                        setattr(obj, attr_name, attr_type(attr_value))
+                    else:
+                        setattr(obj, attr_name, attr_value)
             else:
                 attr_name, attr_value = args[2].split(" ", 1)
-                setattr(obj, attr_name, attr_value.strip('"'))
+                if hasattr(obj, attr_name):
+                    attr_type = type(getattr(obj, attr_name))
+                    setattr(obj, attr_name, attr_type(attr_value.strip('"')))
+                else:
+                    setattr(obj, attr_name, attr_value.strip('"'))
             obj.save()
 
     def default(self, line):
