@@ -93,6 +93,7 @@ class HBNBCommand(cmd.Cmd):
         obj = storage.all()[key]
         if len(args) == 3:
             if args[2].startswith("{") and args[2].endswith("}"):
+                # Handle dictionary updates
                 attr_dict = eval(args[2])
                 for attr_name, attr_value in attr_dict.items():
                     if hasattr(obj, attr_name):
@@ -101,6 +102,7 @@ class HBNBCommand(cmd.Cmd):
                     else:
                         setattr(obj, attr_name, attr_value)
             else:
+                # Handle single attribute updates
                 attr_name, attr_value = args[2].split(" ", 1)
                 if hasattr(obj, attr_name):
                     attr_type = type(getattr(obj, attr_name))
@@ -108,6 +110,8 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     setattr(obj, attr_name, attr_value.strip('"'))
             obj.save()
+        else:
+            print("** attribute name missing **")
 
     def default(self, line):
         """Handle special commands like <class name>.all() and <class name>.count()"""
