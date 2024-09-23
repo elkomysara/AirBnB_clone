@@ -10,7 +10,8 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-import re  # To handle the dot notation commands
+import re  # To handle dot notation commands
+
 
 class HBNBCommand(cmd.Cmd):
     """Command interpreter for the HBNB console."""
@@ -28,19 +29,24 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def default(self, line):
-        """Handle default behavior when a command is not explicitly defined"""
+        """Handle dot notation for 'all()' and 'count()'"""
         match = re.match(r"(\w+)\.(\w+)\(\)", line)
         if match:
             class_name, command = match.groups()
-            if class_name in self.classes and command == "all":
-                self.do_all(class_name)
+            if class_name in self.classes:
+                if command == "all":
+                    self.do_all(class_name)
+                elif command == "count":
+                    self.do_count(class_name)
+                else:
+                    print("** unknown command **")
             else:
-                print("** class doesn't exist **" if class_name not in self.classes else "** unknown command **")
+                print("** class doesn't exist **")
         else:
             print(f"*** Unknown syntax: {line}")
 
     def do_create(self, arg):
-        """Creates a new instance of a given class, saves it, and prints the id."""
+        """Creates a new instance of a class, saves it, and prints the id."""
         if not arg:
             print("** class name missing **")
         elif arg not in self.classes:
@@ -84,7 +90,7 @@ class HBNBCommand(cmd.Cmd):
                 storage.save()
 
     def do_all(self, arg):
-        """Prints all string representations of all instances or based on class name."""
+        """Prints all string representations of all instances, or based on class name."""
         if arg and arg not in self.classes:
             print("** class doesn't exist **")
         else:
@@ -94,8 +100,13 @@ class HBNBCommand(cmd.Cmd):
                     obj_list.append(str(obj))
             print(obj_list)
 
+    def do_count(self, class_name):
+        """Counts the number of instances of a given class."""
+        count = sum(1 for obj in storage.all().values() if obj.__class__.__name__ == class_name)
+        print(count)
+
     def do_update(self, arg):
-        """Updates an instance based on the class name and id."""
+        """Updates an instance based on class name and id."""
         args = arg.split()
         if not args:
             print("** class name missing **")
@@ -117,6 +128,7 @@ class HBNBCommand(cmd.Cmd):
                 attr_value = args[3].strip('"')
                 setattr(obj, attr_name, attr_value)
                 obj.save()
+
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
