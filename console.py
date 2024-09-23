@@ -10,7 +10,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-import re  # To handle dot notation commands
+import re
 
 
 class HBNBCommand(cmd.Cmd):
@@ -29,20 +29,26 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def default(self, line):
-        """Handle dot notation for 'all()', 'count()', 'show()', and 'destroy()'"""
+        """Handle dot notation for 'all()', 'count()', 'show()', 'destroy()', and 'update()'."""
         match = re.match(r"(\w+)\.(\w+)\((.*)\)", line)
         if match:
             class_name, command, args = match.groups()
-            args = args.strip('"')  # Remove any surrounding quotes
+            args = args.split(", ")
+            args = [arg.strip('"') for arg in args]  # Strip any quotes
             if class_name in self.classes:
                 if command == "all":
                     self.do_all(class_name)
                 elif command == "count":
                     self.do_count(class_name)
                 elif command == "show":
-                    self.do_show(f"{class_name} {args}")
+                    if len(args) > 0:
+                        self.do_show(f"{class_name} {args[0]}")
                 elif command == "destroy":
-                    self.do_destroy(f"{class_name} {args}")
+                    if len(args) > 0:
+                        self.do_destroy(f"{class_name} {args[0]}")
+                elif command == "update":
+                    if len(args) == 3:
+                        self.do_update(f"{class_name} {args[0]} {args[1]} {args[2]}")
                 else:
                     print("** unknown command **")
             else:
@@ -111,7 +117,7 @@ class HBNBCommand(cmd.Cmd):
         print(count)
 
     def do_update(self, arg):
-        """Updates an instance based on class name and id."""
+        """Updates an instance based on class name, id, attribute name, and attribute value."""
         args = arg.split()
         if not args:
             print("** class name missing **")
@@ -131,6 +137,16 @@ class HBNBCommand(cmd.Cmd):
                 obj = storage.all()[key]
                 attr_name = args[2]
                 attr_value = args[3].strip('"')
+                
+                # Attempt to cast the attribute value to the appropriate type
+                if attr_value.isdigit():
+                    attr_value = int(attr_value)
+                else:
+                    try:
+                        attr_value = float(attr_value)
+                    except ValueError:
+                        pass  # Leave it as a string if it's not a number
+
                 setattr(obj, attr_name, attr_value)
                 obj.save()
 
