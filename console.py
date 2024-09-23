@@ -29,15 +29,18 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def default(self, line):
-        """Handle dot notation for 'all()' and 'count()'"""
-        match = re.match(r"(\w+)\.(\w+)\(\)", line)
+        """Handle dot notation for 'all()', 'count()', and 'show()'"""
+        match = re.match(r"(\w+)\.(\w+)\((.*)\)", line)
         if match:
-            class_name, command = match.groups()
+            class_name, command, args = match.groups()
+            args = args.strip('"')  # Remove any surrounding quotes
             if class_name in self.classes:
                 if command == "all":
                     self.do_all(class_name)
                 elif command == "count":
                     self.do_count(class_name)
+                elif command == "show":
+                    self.do_show(f"{class_name} {args}")
                 else:
                     print("** unknown command **")
             else:
