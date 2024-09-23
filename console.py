@@ -29,7 +29,7 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def default(self, line):
-        """Handle dot notation for 'all()', 'count()', and 'show()'"""
+        """Handle dot notation for 'all()', 'count()', 'show()', and 'destroy()'"""
         match = re.match(r"(\w+)\.(\w+)\((.*)\)", line)
         if match:
             class_name, command, args = match.groups()
@@ -41,6 +41,8 @@ class HBNBCommand(cmd.Cmd):
                     self.do_count(class_name)
                 elif command == "show":
                     self.do_show(f"{class_name} {args}")
+                elif command == "destroy":
+                    self.do_destroy(f"{class_name} {args}")
                 else:
                     print("** unknown command **")
             else:
