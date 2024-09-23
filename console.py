@@ -10,6 +10,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
+import re  # To handle the dot notation commands
 
 class HBNBCommand(cmd.Cmd):
     """Command interpreter for the HBNB console."""
@@ -25,6 +26,18 @@ class HBNBCommand(cmd.Cmd):
         "Place": Place,
         "Review": Review
     }
+
+    def default(self, line):
+        """Handle default behavior when a command is not explicitly defined"""
+        match = re.match(r"(\w+)\.(\w+)\(\)", line)
+        if match:
+            class_name, command = match.groups()
+            if class_name in self.classes and command == "all":
+                self.do_all(class_name)
+            else:
+                print("** class doesn't exist **" if class_name not in self.classes else "** unknown command **")
+        else:
+            print(f"*** Unknown syntax: {line}")
 
     def do_create(self, arg):
         """Creates a new instance of a given class, saves it, and prints the id."""
