@@ -10,6 +10,9 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import sys
+sys.path.append('/home/elkomy/anaconda3/envs/alxse/lib/python3.12/site-packages')
+
 
 
 class HBNBCommand(cmd.Cmd):
