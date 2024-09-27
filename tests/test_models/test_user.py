@@ -1,24 +1,34 @@
 #!/usr/bin/python3
-import unittest
+""" """
+from tests.test_models.test_base_model import test_basemodel
 from models.user import User
 
-class TestUser(unittest.TestCase):
-    """Test cases for the User class"""
 
-    def setUp(self):
-        """Set up a User instance for testing"""
-        self.user = User()
+class test_User(test_basemodel):
+    """ """
 
-    def test_instance(self):
-        """Test if the instance is of type User"""
-        self.assertIsInstance(self.user, User)
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "User"
+        self.value = User
 
-    def test_attributes(self):
-        """Test attributes of the User"""
-        self.assertIsInstance(self.user.email, str)
-        self.assertIsInstance(self.user.password, str)
-        self.assertEqual(self.user.email, "")
-        self.assertEqual(self.user.password, "")
+    def test_first_name(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.first_name), str)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_last_name(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.last_name), str)
+
+    def test_email(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.email), str)
+
+    def test_password(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.password), str)
