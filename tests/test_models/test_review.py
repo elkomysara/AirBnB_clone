@@ -27,3 +27,12 @@ class test_review(test_basemodel):
         """ """
         new = self.value()
         self.assertEqual(type(new.text), str)
+
+    def test_updated_at(self):
+        """Test that updated_at is different after saving the object"""
+        new = self.value()
+        created_at = new.created_at
+        # Call save to update the updated_at timestamp
+        new.save()
+        self.assertFalse(created_at == new.updated_at)
+        self.assertTrue(created_at == new.created_at)

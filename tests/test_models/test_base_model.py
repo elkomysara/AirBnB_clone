@@ -91,9 +91,10 @@ class test_basemodel(unittest.TestCase):
         self.assertEqual(type(new.created_at), datetime.datetime)
 
     def test_updated_at(self):
-        """ """
+        """Test that updated_at is different after saving the object"""
         new = self.value()
-        self.assertEqual(type(new.updated_at), datetime.datetime)
-        n = new.to_dict()
-        new = BaseModel(**n)
-        self.assertFalse(new.created_at == new.updated_at)
+        created_at = new.created_at
+        # Call save to update the updated_at timestamp
+        new.save()
+        self.assertFalse(created_at == new.updated_at)
+        self.assertTrue(created_at == new.created_at)
