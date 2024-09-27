@@ -1,45 +1,51 @@
 
+import uuid
 from datetime import datetime
-import models
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-import uuid
+import models
 
 Base = declarative_base()
 
 class BaseModel:
-    """The BaseModel class defines all common attributes/methods for other classes"""
+    """A base class for all models using SQLAlchemy"""
     
-    id = Column(String(60), primary_key=True, nullable=False, unique=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    
+    id = Column(String(60), primary_key=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
     def __init__(self, *args, **kwargs):
-        """Initialize a new model instance."""
-        self.id = str(uuid.uuid4())
-        self.created_at = self.updated_at = datetime.utcnow()
-        
+        """Instantiates a new model, manages kwargs for SQLAlchemy"""
         if kwargs:
             for key, value in kwargs.items():
                 if key != '__class__':
                     setattr(self, key, value)
-    
+            if kwargs.get("id") is None:
+                self.id = str(uuid.uuid4())
+            if kwargs.get("created_at") is None:
+                self.created_at = datetime.utcnow()
+            if kwargs.get("updated_at") is None:
+                self.updated_at = datetime.utcnow()
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = self.updated_at = datetime.utcnow()
+
     def save(self):
-        """Updates `updated_at` and saves the instance to storage."""
+        """Saves the instance to the database"""
         self.updated_at = datetime.utcnow()
         models.storage.new(self)
         models.storage.save()
 
     def to_dict(self):
-        """Returns a dictionary representation of the instance."""
-        my_dict = self.__dict__.copy()
-        if '_sa_instance_state' in my_dict:
-            del my_dict['_sa_instance_state']
-        my_dict['created_at'] = self.created_at.isoformat()
-        my_dict['updated_at'] = self.updated_at.isoformat()
-        my_dict['__class__'] = self.__class__.__name__
-        return my_dict
+        """Converts instance to a dictionary format"""
+        dict_obj = self.__dict__.copy()
+        if "_sa_instance_state" in dict_obj:
+            del dict_obj["_sa_instance_state"]
+        dict_obj['__class__'] = self.__class__.__name__
+        dict_obj['created_at'] = self.created_at.isoformat()
+        dict_obj['updated_at'] = self.updated_at.isoformat()
+        return dict_obj
 
     def delete(self):
-        """Deletes the current instance from storage."""
+        """Delete the current instance from storage"""
         models.storage.delete(self)
